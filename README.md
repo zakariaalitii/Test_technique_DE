@@ -256,13 +256,11 @@ Le monitoring centralise les statuts d'exécution, les volumes traités, les rej
 
 
 ## 9. Améliorations avec plus de temps
-1. **Ingestion incrémentale** : reprise sur erreur, gestion des API et chargements incrémentaux.
-2. **Data Lake** : intégrer Apache Iceberg ou Delta Lake pour les transactions ACID et le versionnement.
-3. **Monitoring** : renforcer les tests, alertes, SLA et dashboards de supervision.
-4. **Sécurité** : RBAC, chiffrement, gestion des secrets et audit des accès.
-5. **Data Governance** : catalogage, Data Lineage et classification des données avec DataHub ou Apache Atlas.
-6. **CI/CD** : automatiser les tests et déploiements sur **DEV → RECETTE → PRÉPROD → PROD**.
-7. **BI** : enrichir les dashboards Metabase et documenter les KPI.
+1. **Monitoring** : renforcer les tests, alertes, SLA et dashboards de supervision.
+2. **Sécurité** : RBAC, chiffrement, gestion des secrets et audit des accès.
+3. **Data Governance** : catalogage, Data Lineage et classification des données avec DataHub ou Apache Atlas.
+4. **CI/CD** : automatiser les tests et déploiements sur **DEV → RECETTE → PRÉPROD → PROD**.
+5. **BI** : enrichir les dashboards Metabase et documenter les KPI.
    
 ## 10. Structure principale du dépôt
 
