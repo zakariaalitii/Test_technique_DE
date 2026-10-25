@@ -8,7 +8,7 @@ Ce projet vise à concevoir un pipeline Data Engineering de bout en bout à part
 
 
 
-## 1.1. Architecture globale
+### 1.1. Architecture globale
 
 ![Architecture globale du projet](docs/imgs/archi.png)
 
@@ -186,7 +186,7 @@ Pour connecter **Metabase à PostgreSQL**, utiliser les paramètres suivants :
 
 **Arbitrage principal :** privilégier une architecture conforme au sujet (stockage objet pour **les trois couches**) plutôt qu'une variante Silver/Gold directement dans PostgreSQL. PostgreSQL reste utile pour servir les KPI à Metabase.
 
-## 4. Organisation du bucket sotrage
+## 4. Organisation du stockage objet
 
 ```text
 taxi-lake/
@@ -223,7 +223,7 @@ taxi-lake/
 
 Les chemins sont organisés par période (`start=.../end=...`). Les contrôles sont enregistrés dans `data_quality.check_results` ; les métriques d'exécution dans `monitoring.pipeline_runs`.
 
-### 4.5. Data Modling(Star Schema) et indicateurs métier
+### 4.5. Modélisation dimensionnelle (Star Schema) et indicateurs métier
 
 ![Schéma en étoile — table de faits et dimensions](docs/imgs/data_modling.png)
 
@@ -239,7 +239,7 @@ Les KPI exposés comprennent :
 Le « revenue » correspond ici à la **somme des montants facturés (`trip_total`)**, indicateur analytique brut et non chiffre d'affaires net comptable.
 
 
-## 5. Orchestration Airflow(Pipeline et qualité des données)
+## 5. Orchestration du pipeline avec Apache Airflow
 
 ![DAG Airflow : 11 tâches réussies](docs/imgs/airflow.png)
 
@@ -259,20 +259,20 @@ Le « revenue » correspond ici à la **somme des montants facturés (`trip_tota
 | 11 | `validate_bi_postgres` | Réconcilier les résultats exposés en BI. |
 
 
-### 6. Contrôles de qualité
+## 6. Contrôles de qualité
 
 ![Résultats des contrôles DQ1/DQ2/DQ3](docs/imgs/dq.png)
 
-### 7. Monitoring
+## 7. Monitoring
 
 ![Suivi des tâches et des volumes](docs/imgs/monitoring.png)
 
-### 8. Visualisation Metabase
+## 8. Visualisation Metabase
 
 ![Répartition des trajets et des montants par paiement](docs/imgs/data_vis.png)
 
 
-## 9. Limites et améliorations avec plus de temps
+## 9. Améliorations avec plus de temps
 1. **Ingestion incrémentale** : reprise sur erreur, gestion des API et chargements incrémentaux.
 2. **Data Lake** : intégrer Apache Iceberg ou Delta Lake pour les transactions ACID et le versionnement.
 3. **Monitoring** : renforcer les tests, alertes, SLA et dashboards de supervision.
