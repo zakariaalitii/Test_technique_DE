@@ -6,6 +6,91 @@ Ce projet vise à concevoir un pipeline Data Engineering de bout en bout à part
 
 **Périmètre de démonstration :** du **1er janvier 2023 inclus au 1er février 2023 exclu**, avec un plafond de **100 000 lignes**, extraites par pages de **10 000**. Le plafond permet une exécution raisonnable sur un ordinateur local ; il ne correspond pas nécessairement à l'intégralité des trajets de cette période.
 
+
+
+## 1.1. Architecture globale
+
+![Architecture globale du projet](docs/imgs/archi.png)
+
+Le projet repose sur une architecture **Data Lake Medallion (Bronze, Silver, Gold)**, orchestrée par **Apache Airflow** et déployée localement avec **Docker Compose**.
+
+### 1.2. Composants de l'architecture
+
+| Composant | Technologie | Rôle |
+|---|---|---|
+| **Source** | Chicago Taxi Trips API SODA | Extraction des données CSV |
+| **Ingestion** | Python, Requests, Boto3 | Extraction et chargement des données brutes |
+| **Stockage** | MinIO / Silo | Stockage objet des couches Bronze, Silver et Gold |
+| **Transformation** | Apache Spark (PySpark) | Nettoyage, déduplication et agrégations |
+| **Data Quality** | Great Expectations | Contrôles qualité DQ1, DQ2 et DQ3 |
+| **Orchestration** | Apache Airflow | Automatisation et suivi du pipeline |
+| **Data Warehouse** | PostgreSQL | Exposition SQL, modélisation en étoile et KPI |
+| **Monitoring** | PostgreSQL | Suivi des exécutions, erreurs, volumes et contrôles qualité |
+| **Visualisation** | Metabase | Tableaux de bord et analyse des KPI |
+| **Déploiement** | Docker Compose | Exécution locale et reproductible |
+
+### 1.3. Flux de données
+
+```text
+Chicago Taxi Trips (API SODA)
+              |
+              v
+       Python + Boto3
+              |
+              v
+      MinIO — BRONZE
+        CSV + Parquet
+              |
+              v
+      PySpark + DQ1
+         /         \
+        v           v
+   VALID DATA    REJECTED DATA
+        |           |
+        v           v
+  MinIO — SILVER  MinIO — REJECTS
+        |
+        v
+    DQ2 + PySpark
+        |
+        v
+    MinIO — GOLD
+     KPIs Parquet
+        |
+        v
+   DQ3 — Validation
+        |
+        v
+      PostgreSQL
+   SQL + Star Schema
+        |
+        v
+       Metabase
+    BI Dashboards
+```
+
+### 1.3. Contrôles qualité
+
+Les contrôles qualité sont réalisés avec **Great Expectations** à trois niveaux :
+
+- **DQ1 — Bronze :** validation du schéma et des données, séparation des enregistrements valides et rejetés.
+- **DQ2 — Silver :** vérification des valeurs nulles, des doublons et des règles métier.
+- **DQ3 — Gold :** validation des agrégations, des KPI et réconciliation des volumes.
+
+Les données rejetées sont conservées dans `rejects/` sur MinIO pour permettre leur analyse.
+
+### 1.4. Monitoring et visualisation
+
+Le suivi du pipeline est centralisé dans **PostgreSQL** :
+
+- `monitoring.pipeline_runs` : statut des tâches, volumes traités, rejets, durées et erreurs.
+- `data_quality.check_results` : résultats et traçabilité des contrôles qualité.
+
+Les données Silver et Gold sont également exposées dans PostgreSQL pour faciliter les **requêtes SQL**, la **modélisation dimensionnelle (Star Schema)** et la **visualisation des KPI avec Metabase**.
+
+**Point architectural important :** MinIO constitue le stockage principal des trois couches Bronze, Silver et Gold. PostgreSQL intervient en complément comme couche de service analytique, de monitoring et de visualisation BI.
+
+
 ## 2. Prérequis et démarrage du projet
 
 ### 2.1. Prérequis
@@ -82,94 +167,8 @@ Pour connecter **Metabase à PostgreSQL**, utiliser les paramètres suivants :
 
 **Remarque :** lors d'un premier démarrage, l'initialisation des services et de la base PostgreSQL peut prendre quelques minutes.
 
-## 4. Architecture globale
 
-![Architecture globale du projet](docs/imgs/archi.png)
-
-## 4. Architecture globale
-
-![Architecture globale du projet](docs/imgs/archi.png)
-
-Le projet repose sur une architecture **Data Lake Medallion (Bronze, Silver, Gold)**, orchestrée par **Apache Airflow** et déployée localement avec **Docker Compose**.
-
-### 4.1. Composants de l'architecture
-
-| Composant | Technologie | Rôle |
-|---|---|---|
-| **Source** | Chicago Taxi Trips API SODA | Extraction des données CSV |
-| **Ingestion** | Python, Requests, Boto3 | Extraction et chargement des données brutes |
-| **Stockage** | MinIO / Silo | Stockage objet des couches Bronze, Silver et Gold |
-| **Transformation** | Apache Spark (PySpark) | Nettoyage, déduplication et agrégations |
-| **Data Quality** | Great Expectations | Contrôles qualité DQ1, DQ2 et DQ3 |
-| **Orchestration** | Apache Airflow | Automatisation et suivi du pipeline |
-| **Data Warehouse** | PostgreSQL | Exposition SQL, modélisation en étoile et KPI |
-| **Monitoring** | PostgreSQL | Suivi des exécutions, erreurs, volumes et contrôles qualité |
-| **Visualisation** | Metabase | Tableaux de bord et analyse des KPI |
-| **Déploiement** | Docker Compose | Exécution locale et reproductible |
-
-### 4.2. Flux de données
-
-```text
-Chicago Taxi Trips (API SODA)
-              |
-              v
-       Python + Boto3
-              |
-              v
-      MinIO — BRONZE
-        CSV + Parquet
-              |
-              v
-      PySpark + DQ1
-         /         \
-        v           v
-   VALID DATA    REJECTED DATA
-        |           |
-        v           v
-  MinIO — SILVER  MinIO — REJECTS
-        |
-        v
-    DQ2 + PySpark
-        |
-        v
-    MinIO — GOLD
-     KPIs Parquet
-        |
-        v
-   DQ3 — Validation
-        |
-        v
-      PostgreSQL
-   SQL + Star Schema
-        |
-        v
-       Metabase
-    BI Dashboards
-```
-
-### 4.3. Contrôles qualité
-
-Les contrôles qualité sont réalisés avec **Great Expectations** à trois niveaux :
-
-- **DQ1 — Bronze :** validation du schéma et des données, séparation des enregistrements valides et rejetés.
-- **DQ2 — Silver :** vérification des valeurs nulles, des doublons et des règles métier.
-- **DQ3 — Gold :** validation des agrégations, des KPI et réconciliation des volumes.
-
-Les données rejetées sont conservées dans `rejects/` sur MinIO pour permettre leur analyse.
-
-### 4.4. Monitoring et visualisation
-
-Le suivi du pipeline est centralisé dans **PostgreSQL** :
-
-- `monitoring.pipeline_runs` : statut des tâches, volumes traités, rejets, durées et erreurs.
-- `data_quality.check_results` : résultats et traçabilité des contrôles qualité.
-
-Les données Silver et Gold sont également exposées dans PostgreSQL pour faciliter les **requêtes SQL**, la **modélisation dimensionnelle (Star Schema)** et la **visualisation des KPI avec Metabase**.
-
-**Point architectural important :** MinIO constitue le stockage principal des trois couches Bronze, Silver et Gold. PostgreSQL intervient en complément comme couche de service analytique, de monitoring et de visualisation BI.
-
-
-## 5. Choix techniques et arbitrages
+## 3. Choix techniques et arbitrages
 
 | Besoin | Technologie retenue | Alternatives | Justification / compromis |
 |---|---|---|---|
@@ -187,7 +186,7 @@ Les données Silver et Gold sont également exposées dans PostgreSQL pour facil
 
 **Arbitrage principal :** privilégier une architecture conforme au sujet (stockage objet pour **les trois couches**) plutôt qu'une variante Silver/Gold directement dans PostgreSQL. PostgreSQL reste utile pour servir les KPI à Metabase.
 
-## 6. Organisation du bucket sotrage
+## 4. Organisation du bucket sotrage
 
 ```text
 taxi-lake/
@@ -204,19 +203,19 @@ taxi-lake/
         └── payment_methods/
 ```
 
-### 6.1. Structure du lac de données
+### 4.1. Structure du lac de données
 
 ![MinIO : Bronze, Silver, Gold et rejets](docs/imgs/datalake.png)
 
-### 6.2. Silver dans MinIO
+### 4.2. Silver dans MinIO
 
 ![MinIO : Silver Parquet](docs/imgs/MinIO Silver.png)
 
-### 6.3. Gold dans MinIO
+### 4.3. Gold dans MinIO
 
 ![MinIO : Gold Parquet](docs/imgs/MinIO Gold.png)
 
-### 6.4. PostgreSQL : couche BI
+### 4.4. PostgreSQL : couche BI
 
 ![PostgreSQL : schémas](docs/imgs/postgresql.png)
 
@@ -224,7 +223,7 @@ taxi-lake/
 
 Les chemins sont organisés par période (`start=.../end=...`). Les contrôles sont enregistrés dans `data_quality.check_results` ; les métriques d'exécution dans `monitoring.pipeline_runs`.
 
-### 6.5. Data Modling(Star Schema) et indicateurs métier
+### 4.5. Data Modling(Star Schema) et indicateurs métier
 
 ![Schéma en étoile — table de faits et dimensions](docs/imgs/data_modling.png)
 
@@ -240,7 +239,7 @@ Les KPI exposés comprennent :
 Le « revenue » correspond ici à la **somme des montants facturés (`trip_total`)**, indicateur analytique brut et non chiffre d'affaires net comptable.
 
 
-## 8.1. Orchestration Airflow(Pipeline et qualité des données)
+## 5. Orchestration Airflow(Pipeline et qualité des données)
 
 ![DAG Airflow : 11 tâches réussies](docs/imgs/airflow.png)
 
@@ -260,20 +259,20 @@ Le « revenue » correspond ici à la **somme des montants facturés (`trip_tota
 | 11 | `validate_bi_postgres` | Réconcilier les résultats exposés en BI. |
 
 
-### 8.6. Contrôles de qualité
+### 6. Contrôles de qualité
 
 ![Résultats des contrôles DQ1/DQ2/DQ3](docs/imgs/dq.png)
 
-### 8.7. Monitoring
+### 7. Monitoring
 
 ![Suivi des tâches et des volumes](docs/imgs/monitoring.png)
 
-### 8.8. Visualisation Metabase
+### 8. Visualisation Metabase
 
 ![Répartition des trajets et des montants par paiement](docs/imgs/data_vis.png)
 
 
-## 10. Limites et améliorations avec plus de temps
+## 9. Limites et améliorations avec plus de temps
 1. **Ingestion incrémentale** : reprise sur erreur, gestion des API et chargements incrémentaux.
 2. **Data Lake** : intégrer Apache Iceberg ou Delta Lake pour les transactions ACID et le versionnement.
 3. **Monitoring** : renforcer les tests, alertes, SLA et dashboards de supervision.
@@ -282,7 +281,7 @@ Le « revenue » correspond ici à la **somme des montants facturés (`trip_tota
 6. **CI/CD** : automatiser les tests et déploiements sur **DEV → RECETTE → PRÉPROD → PROD**.
 7. **BI** : enrichir les dashboards Metabase et documenter les KPI.
    
-## 11. Structure principale du dépôt
+## 10. Structure principale du dépôt
 
 ```text
 .
