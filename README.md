@@ -124,7 +124,7 @@ Pour arrêter les services **en conservant les données** : `docker compose down
 
 ## 4. Architecture globale
 
-![Architecture globale du projet](docs/img/archi.png)
+![Architecture globale du projet](docs/imgs/archi.png)
 
 ```text
 Chicago Taxi Trips (API SODA / CSV)
