@@ -205,7 +205,7 @@ taxi-lake/
 
 ![PostgreSQL : schémas](docs/imgs/postgresql.png)
 
-![PostgreSQL : tables et KPI Gold](docs/imgs/MinIOgold.png)
+![PostgreSQL : tables et KPI Gold](docs/imgs/MinI_Ogold.png)
 
 Les chemins sont organisés par période (`start=.../end=...`). Les contrôles sont enregistrés dans `data_quality.check_results` ; les métriques d'exécution dans `monitoring.pipeline_runs`.
 
