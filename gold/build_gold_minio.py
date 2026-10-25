@@ -1,4 +1,3 @@
-"""Produce the business Gold aggregates using PySpark; persist every table to MinIO."""
 import os
 from datetime import datetime, timezone
 from pyspark.sql import functions as F

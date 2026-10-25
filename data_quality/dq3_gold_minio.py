@@ -25,7 +25,7 @@ def main():
         check("DQ3", "pickup_zone_count_reconciles", zone_count == non_null_pickups, zone_count)
         for name, df in [("daily", daily), ("payment", payment)]:
             revenue = df.agg(F.sum("total_revenue")).first()[0] or 0
-            # Individual groups are rounded to cents, so tolerate cumulative rounding error.
+
             tolerance = max(0.01, df.count() * 0.005 + 0.01)
             check("DQ3", f"{name}_revenue_reconciles", abs(float(revenue)-float(silver_total)) <= tolerance, revenue, details={"silver": str(silver_total), "tolerance": tolerance})
         invalid = daily.filter((F.col("trip_count") < 0) | (F.col("total_revenue") < 0)).count()

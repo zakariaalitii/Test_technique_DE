@@ -1,4 +1,3 @@
-"""Transactional dimensional build; Gold is committed only if internal reconciliations pass."""
 import os
 from datetime import datetime, timezone
 from monitoring.db import connection,task_metric,check

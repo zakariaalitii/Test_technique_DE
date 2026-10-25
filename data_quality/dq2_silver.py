@@ -1,4 +1,3 @@
-"""Great Expectations checks on the authoritative Silver MinIO Parquet snapshot."""
 import os
 from datetime import datetime, timezone
 from pyspark.sql import functions as F
