@@ -135,9 +135,6 @@ New-Item -ItemType Directory -Force logs | Out-Null
 
 # Construire et démarrer les services
 docker compose up -d --build
-
-# Vérifier l'état des conteneurs
-docker compose ps -a
 ```
 
 ### 2.4. Accès aux services
@@ -147,7 +144,7 @@ docker compose ps -a
 | **Apache Airflow** | http://localhost:8080 | Orchestration, exécution et suivi des DAGs |
 | **MinIO / Silo** | http://localhost:9001 | Exploration des données Bronze, Silver, Gold et Rejects |
 | **Metabase** | http://localhost:3000 | Visualisation des KPI et tableaux de bord |
-| **PostgreSQL Warehouse** | `localhost:5433` | Requêtes SQL via DBeaver ou pgAdmin |
+| **PostgreSQL Warehouse** | `http://localhost:5433` | Requêtes SQL via DBeaver ou pgAdmin |
 
 Pour connecter **Metabase à PostgreSQL**, utiliser les paramètres suivants :
 
@@ -156,17 +153,6 @@ Pour connecter **Metabase à PostgreSQL**, utiliser les paramètres suivants :
 - **Port :** `5432`
 - **Base de données :** `taxi`
 - **Identifiants :** définis dans le fichier `.env`
-
-### 2.5. Exécution du pipeline
-
-1. Accéder à Apache Airflow sur le port `8080`.
-2. Sélectionner le DAG `test_technique_data_engineer_ma`.
-3. Activer le DAG si nécessaire, puis cliquer sur **Trigger DAG**.
-4. Suivre l'exécution des 11 tâches dans la vue **Graph**.
-5. Vérifier les résultats dans MinIO, PostgreSQL et Metabase.
-
-**Remarque :** lors d'un premier démarrage, l'initialisation des services et de la base PostgreSQL peut prendre quelques minutes.
-
 
 ## 3. Choix techniques et arbitrages
 
@@ -213,13 +199,13 @@ taxi-lake/
 
 ### 4.3. Gold dans MinIO
 
-![MinIO : Gold Parquet](docs/imgs/MinIO Gold.png)
+![MinIO : Gold Parquet](docs/imgs/MinIO_Gold.png)
 
 ### 4.4. PostgreSQL : couche BI
 
 ![PostgreSQL : schémas](docs/imgs/postgresql.png)
 
-![PostgreSQL : tables et KPI Gold](docs/imgs/gold.png)
+![PostgreSQL : tables et KPI Gold](docs/imgs/MinIOgold.png)
 
 Les chemins sont organisés par période (`start=.../end=...`). Les contrôles sont enregistrés dans `data_quality.check_results` ; les métriques d'exécution dans `monitoring.pipeline_runs`.
 
@@ -240,6 +226,8 @@ Le « revenue » correspond ici à la **somme des montants facturés (`trip_tota
 
 
 ## 5. Orchestration du pipeline avec Apache Airflow
+1. Accéder à Apache Airflow sur le port `8080`.
+2. Sélectionner le DAG `test_technique_data_engineer_ma`.
 
 ![DAG Airflow : 11 tâches réussies](docs/imgs/airflow.png)
 
