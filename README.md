@@ -144,7 +144,7 @@ docker compose up -d --build
 | **Apache Airflow** | `http://localhost:8080` | Orchestration, exécution et suivi des DAGs |
 | **MinIO / Silo** | `http://localhost:9001` | Exploration des données Bronze, Silver, Gold et Rejects |
 | **Metabase** | `http://localhost:3000` | Visualisation des KPI et tableaux de bord |
-| **PostgreSQL Warehouse** | `http://localhost:5433` | Requêtes SQL via DBeaver ou pgAdmin |
+| **PostgreSQL Warehouse** | `localhost:5433` | Requêtes SQL via DBeaver ou pgAdmin |
 
 Pour connecter **Metabase à PostgreSQL**, utiliser les paramètres suivants :
 
@@ -168,9 +168,6 @@ Pour connecter **Metabase à PostgreSQL**, utiliser les paramètres suivants :
 | **Visualisation** | Metabase | Power BI, Tableau, Superset | Solution open source, simple à déployer avec Docker et choisie principalement pour tester la connexion à PostgreSQL, explorer les données et visualiser les KPI. |
 | **Déploiement** | Docker Compose | Kubernetes | Déploiement local reproductible, simple à configurer et à exécuter sans infrastructure externe. |
 
-**Arbitrage principal :** privilégier une architecture locale, simple et reproductible, tout en conservant des technologies couramment utilisées en entreprise. **MinIO** assure le stockage des couches Bronze, Silver et Gold, **PySpark** réalise les transformations, tandis que **PostgreSQL** facilite l'exploitation SQL, le monitoring et la connexion aux outils BI.
-
-**Arbitrage principal :** privilégier une architecture conforme au sujet (stockage objet pour **les trois couches**) plutôt qu'une variante Silver/Gold directement dans PostgreSQL. PostgreSQL reste utile pour servir les KPI à Metabase.
 
 ## 4. Organisation du stockage objet
 
@@ -243,11 +240,13 @@ Le « revenue » correspond ici à la **somme des montants facturés (`trip_tota
 | 11 | `validate_bi_postgres` | Réconcilier les résultats exposés en BI. |
 
 
-## 6. Contrôles de qualité
+## 6. Data Quality
+Les contrôles DQ1, DQ2 et DQ3 permettent de valider les données à chaque étape du pipeline, avec traçabilité des résultats dans PostgreSQL.
 
 ![Résultats des contrôles DQ1/DQ2/DQ3](docs/imgs/dq.png)
 
 ## 7. Monitoring
+Le monitoring centralise les statuts d'exécution, les volumes traités, les rejets, les durées et les erreurs dans PostgreSQL.
 
 ![Suivi des tâches et des volumes](docs/imgs/monitoring.png)
 
@@ -286,5 +285,3 @@ Le « revenue » correspond ici à la **somme des montants facturés (`trip_tota
 ├── .env.example
 └── README.md
 ```
-
-**Note :** les captures démontrent une exécution réussie sur la machine de développement. La reproductibilité complète doit être vérifiée par une exécution de bout en bout sur un environnement Docker propre avant livraison.
