@@ -141,9 +141,9 @@ docker compose up -d --build
 
 | Service | Adresse locale | Utilité |
 |---|---|---|
-| **Apache Airflow** | http://localhost:8080 | Orchestration, exécution et suivi des DAGs |
-| **MinIO / Silo** | http://localhost:9001 | Exploration des données Bronze, Silver, Gold et Rejects |
-| **Metabase** | http://localhost:3000 | Visualisation des KPI et tableaux de bord |
+| **Apache Airflow** | `http://localhost:8080` | Orchestration, exécution et suivi des DAGs |
+| **MinIO / Silo** | `http://localhost:9001` | Exploration des données Bronze, Silver, Gold et Rejects |
+| **Metabase** | `http://localhost:3000` | Visualisation des KPI et tableaux de bord |
 | **PostgreSQL Warehouse** | `http://localhost:5433` | Requêtes SQL via DBeaver ou pgAdmin |
 
 Pour connecter **Metabase à PostgreSQL**, utiliser les paramètres suivants :
@@ -195,7 +195,7 @@ taxi-lake/
 
 ### 4.2. Silver dans MinIO
 
-![MinIO : Silver Parquet](docs/imgs/MinIO Silver.png)
+![MinIO : Silver Parquet](docs/imgs/MinIO_Silver.png)
 
 ### 4.3. Gold dans MinIO
 
