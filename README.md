@@ -217,7 +217,7 @@ Les chemins sont organisés par période (`start=.../end=...`). Les contrôles s
 
 ## 7. Modélisation et indicateurs métier
 
-![Schéma en étoile — table de faits et dimensions](docs/img/data_modling.png)
+![Schéma en étoile — table de faits et dimensions](docs/imgs/data_modling.png)
 
 **Grain de `gold.fact_trips` : un enregistrement par trajet unique (`trip_id`).** Dimensions : `dim_date`, `dim_company`, `dim_payment_type`, `dim_location`. La dimension `dim_location` joue **deux rôles** via `pickup_location_key` et `dropoff_location_key`.
 
@@ -234,37 +234,37 @@ Le « revenue » correspond ici à la **somme des montants facturés (`trip_tota
 
 ### 8.1. Orchestration Airflow
 
-![DAG Airflow : 11 tâches réussies](docs/img/airflow.png)
+![DAG Airflow : 11 tâches réussies](docs/imgs/airflow.png)
 
 ### 8.2. Structure du lac de données
 
-![MinIO : Bronze, Silver, Gold et rejets](docs/img/datalake.png)
+![MinIO : Bronze, Silver, Gold et rejets](docs/imgs/datalake.png)
 
 ### 8.3. Silver dans MinIO
 
-![MinIO : Silver Parquet](docs/img/MinIO Silver.png)
+![MinIO : Silver Parquet](docs/imgs/MinIO Silver.png)
 
 ### 8.4. Gold dans MinIO
 
-![MinIO : Gold Parquet](docs/img/MinIO Gold.png)
+![MinIO : Gold Parquet](docs/imgs/MinIO Gold.png)
 
 ### 8.5. PostgreSQL : couche BI
 
-![PostgreSQL : schémas](docs/img/postgresql.png)
+![PostgreSQL : schémas](docs/imgs/postgresql.png)
 
-![PostgreSQL : tables et KPI Gold](docs/img/gold.png)
+![PostgreSQL : tables et KPI Gold](docs/imgs/gold.png)
 
 ### 8.6. Contrôles de qualité
 
-![Résultats des contrôles DQ1/DQ2/DQ3](docs/img/dq.png)
+![Résultats des contrôles DQ1/DQ2/DQ3](docs/imgs/dq.png)
 
 ### 8.7. Monitoring
 
-![Suivi des tâches et des volumes](docs/img/monitoring.png)
+![Suivi des tâches et des volumes](docs/imgs/monitoring.png)
 
 ### 8.8. Visualisation Metabase
 
-![Répartition des trajets et des montants par paiement](docs/img/data_vis.png)
+![Répartition des trajets et des montants par paiement](docs/imgs/data_vis.png)
 
 ## 9. Résultats observés (exécution du 25/10/2026)
 
@@ -302,7 +302,7 @@ Ces valeurs correspondent à **la démonstration présentée**, et ne constituen
 ├── sql/init/                # Initialisation PostgreSQL
 ├── tests/                   # Tests
 ├── config/                  # Configuration du pipeline
-├── docs/img/                # Captures et diagrammes du rapport
+├── docs/imgs/                # Captures et diagrammes du rapport
 ├── docker-compose.yml
 ├── Dockerfile.airflow
 ├── .env.example
