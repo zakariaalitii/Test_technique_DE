@@ -205,10 +205,6 @@ taxi-lake/
 
 ![PostgreSQL : schémas](docs/imgs/postgresql.png)
 
-![PostgreSQL : tables et KPI Gold](docs/imgs/MinI_Ogold.png)
-
-Les chemins sont organisés par période (`start=.../end=...`). Les contrôles sont enregistrés dans `data_quality.check_results` ; les métriques d'exécution dans `monitoring.pipeline_runs`.
-
 ### 4.5. Modélisation dimensionnelle (Star Schema) et indicateurs métier
 
 ![Schéma en étoile — table de faits et dimensions](docs/imgs/data_modling.png)
