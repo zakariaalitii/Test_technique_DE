@@ -1,0 +1,10 @@
+dataset: chicago_taxi_trips
+source_id: wrvz-psew
+bronze_prefix: bronze/chicago_taxi
+bronze_parquet_prefix: bronze_parquet/chicago_taxi
+validated_prefix: validated/chicago_taxi
+rejects_prefix: rejects/chicago_taxi
+silver_schema: silver
+gold_schema: gold
+quality_schema: data_quality
+monitoring_schema: monitoring

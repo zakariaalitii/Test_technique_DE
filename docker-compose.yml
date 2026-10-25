@@ -1,0 +1,132 @@
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile.airflow
+  env_file: .env
+  environment: &airflow-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__WEBSERVER__SECRET_KEY: local-dev-only-secret-key
+    PYTHONPATH: /opt/airflow/project
+    JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+    WAREHOUSE_HOST: warehouse
+  volumes:
+    - ./dags:/opt/airflow/dags:ro
+    - ./ingestion:/opt/airflow/project/ingestion:ro
+    - ./spark:/opt/airflow/project/spark:ro
+    - ./bronze:/opt/airflow/project/bronze:ro
+    - ./silver:/opt/airflow/project/silver:ro
+    - ./gold:/opt/airflow/project/gold:ro
+    - ./data_quality:/opt/airflow/project/data_quality:ro
+    - ./monitoring:/opt/airflow/project/monitoring:ro
+    - ./config:/opt/airflow/project/config:ro
+    - ./tests:/opt/airflow/project/tests:ro
+    - ./logs:/opt/airflow/logs
+  depends_on:
+    postgres:
+      condition: service_healthy
+    warehouse:
+      condition: service_healthy
+    minio-init:
+      condition: service_completed_successfully
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      retries: 20
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  warehouse:
+    image: postgres:16-alpine
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${WAREHOUSE_USER:-taxi}
+      POSTGRES_PASSWORD: ${WAREHOUSE_PASSWORD}
+      POSTGRES_DB: ${WAREHOUSE_DB:-taxi}
+    ports:
+      - '5433:5432'
+    volumes:
+      - warehouse-data:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 20
+
+  minio:
+    image: pgsty/silo:RELEASE.2026-09-16T00-00-00Z
+    command: server /data --console-address ':9001'
+    env_file: .env
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mcli", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+  minio-init:
+    image: pgsty/silo:RELEASE.2026-09-16T00-00-00Z
+    env_file: .env
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        mcli alias set local http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}"
+        mcli mb --ignore-existing local/$${S3_BUCKET}
+
+  airflow-init:
+    <<: *airflow-common
+    command: >
+      bash -c "airflow db migrate &&
+      (airflow users create --username admin --firstname Admin --lastname User
+      --role Admin --email admin@example.com --password admin || true)"
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - '8080:8080'
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 15s
+      retries: 15
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  metabase:
+    image: metabase/metabase:v0.51.5
+    ports:
+      - '3000:3000'
+    depends_on:
+      warehouse:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  warehouse-data:
+  minio-data:
