@@ -250,6 +250,14 @@ Le monitoring centralise les statuts d'exécution, les volumes traités, les rej
 
 ![Suivi des tâches et des volumes](docs/imgs/monitoring.png)
 
+## 8. Tests automatisés
+
+Le projet intègre des tests automatisés avec **pytest** pour vérifier la fiabilité du pipeline :
+
+- **`test_transforms.py`** : tests des transformations et règles métier PySpark.
+- **`test_quality.py`** : tests des règles de qualité des données.
+- **`test_pipeline_contract.py`** : validation des contrats et des schémas du pipeline.
+
 ## 8. Visualisation Metabase
 
 ![Répartition des trajets et des montants par paiement](docs/imgs/data_vis.png)
